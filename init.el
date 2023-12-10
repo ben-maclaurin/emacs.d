@@ -198,7 +198,7 @@
   (when buffer-file-name
     (shell-command
      (concat
-      "open -a 'IntelliJ IDEA.app'"
+      "open -a 'IntelliJ IDEA.app' "
       (shell-quote-argument buffer-file-name)))))
 
 (global-set-key (kbd "C-x j") 'b-edit-in-intellij)
