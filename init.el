@@ -72,7 +72,7 @@
 
 (setq-default line-spacing 5)
 
-(set-frame-font "MD IO Trial-14" nil t)
+(set-frame-font "EK Modena Mono-14" nil t)
 
 (set-frame-parameter nil 'internal-border-width 50)
 (add-to-list 'default-frame-alist '(internal-border-width . 50))
