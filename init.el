@@ -2,7 +2,7 @@
 
 ;; Copyright © 2023
 
-;; Author: Ben MacLaurin
+;; Author: Ben MacLaurin <benmaclaurin@icloud.com>
 ;; URL: https://github.com/ben-maclaurin/emacs.d
 ;; Package-Requires: ((emacs "29"))
 ;; Created: 2023-12-10
@@ -72,7 +72,7 @@
 
 (setq-default line-spacing 5)
 
-(set-frame-font "Essential PragmataPro-14" nil t)
+(set-frame-font "MD IO Trial-14" nil t)
 
 (set-frame-parameter nil 'internal-border-width 50)
 (add-to-list 'default-frame-alist '(internal-border-width . 50))
@@ -202,9 +202,8 @@
 
 ;; Theme
 (use-package stimmung-themes)
-(load-theme 'stimmung-themes-dark)
-
 (use-package ef-themes) ; if colour needed
+(load-theme 'ef-duo-dark)
 
 
 ;; Custom functions
@@ -329,6 +328,6 @@
                     :overline (face-attribute 'default :foreground))
 
 
-
-
-
+;; YNAB
+(setq ynab-budget-id "64dfafd8-500e-4383-8f81-1822475830ec")
+(setq ynab-api-key (string-trim (shell-command-to-string "security find-generic-password -s ynab-api-key -a ben -w")))
