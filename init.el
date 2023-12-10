@@ -19,7 +19,6 @@
 ;; Emacs
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (setq warning-minimum-level :emergency)
-(global-auto-revert-mode 1) ; listen for local file change
 
 
 ;; Startup
@@ -85,6 +84,7 @@
 ;; No backups, no auto-save
 (setq make-backup-files nil)
 (setq auto-save-default nil)
+(global-auto-revert-mode 1) ; listen for local file change
 
 
 ;; Packages
