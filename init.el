@@ -3,7 +3,7 @@
 ;; Copyright © 2023
 
 ;; Author: Ben MacLaurin
-;; URL: https://github.com/motform/emacs.d
+;; URL: https://github.com/ben-maclaurin/emacs.d
 ;; Package-Requires: ((emacs "29"))
 ;; Created: 2023-12-10
 
