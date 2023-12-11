@@ -76,6 +76,8 @@
 
 (set-frame-parameter nil 'internal-border-width 50)
 (add-to-list 'default-frame-alist '(internal-border-width . 50))
+(set-frame-parameter nil 'border-width 0)
+(set-fringe-style 0)
 
 
 ;; Darwin
@@ -202,8 +204,13 @@
 
 ;; Theme
 (use-package stimmung-themes)
-(use-package ef-themes) ; if colour needed
-(load-theme 'ef-duo-dark)
+
+(setq modus-themes-common-palette-overrides
+      '((border-mode-line-active bg-mode-line-active)
+        (border-mode-line-inactive bg-mode-line-inactive)
+	(bg-main bg-dim)))
+
+(load-theme 'modus-operandi)
 
 
 ;; Custom functions
@@ -319,13 +326,6 @@
    (save-excursion (message-add-header "Bcc:\n"))))
 
 (add-hook 'mu4e-compose-mode-hook 'company-mode)
-
-
-;; Modeline
-(set-face-attribute 'mode-line nil
-                    :overline (face-attribute 'default :foreground))
-(set-face-attribute 'mode-line-inactive nil
-                    :overline (face-attribute 'default :foreground))
 
 
 ;; YNAB
