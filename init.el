@@ -52,6 +52,8 @@
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (setq warning-minimum-level :emergency)
 
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp/")) ;; set load path
+
 
 ;; Startup
 (setq initial-major-mode 'org-mode) ; mainly for scratch buffer
@@ -330,5 +332,8 @@
 
 
 ;; YNAB
+(require 'ynab)
 (setq ynab-budget-id "64dfafd8-500e-4383-8f81-1822475830ec")
 (setq ynab-api-key (string-trim (shell-command-to-string "security find-generic-password -s ynab-api-key -a ben -w")))
+(global-set-key (kbd "C-x y") 'ynab-budget)
+
