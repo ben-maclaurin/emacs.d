@@ -332,6 +332,7 @@
 
 
 ;; YNAB
+;; package repo: https://github.com/ben-maclaurin/ynab-emacs
 (require 'ynab)
 (setq ynab-budget-id "64dfafd8-500e-4383-8f81-1822475830ec")
 (setq ynab-api-key (string-trim (shell-command-to-string "security find-generic-password -s ynab-api-key -a ben -w")))
