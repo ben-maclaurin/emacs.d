@@ -337,3 +337,7 @@
 (setq ynab-budget-id "64dfafd8-500e-4383-8f81-1822475830ec")
 (global-set-key (kbd "C-x y") 'ynab-budget)
 
+
+;; Elfeed
+;; Load feeds from NetNewsFeed .opml file
+(use-package 'elfeed)
