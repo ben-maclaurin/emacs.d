@@ -70,16 +70,13 @@
 (tool-bar-mode -1)
 (context-menu-mode 1)
 (blink-cursor-mode 0)
-(global-hl-line-mode)
 
 (setq-default line-spacing 5)
 
-(set-frame-font "EK Modena Mono-14" nil t)
+(set-frame-font "Berkeley Mono Variable-14" nil t) ;; s-tier
 
-(set-frame-parameter nil 'internal-border-width 50)
-(add-to-list 'default-frame-alist '(internal-border-width . 50))
-(set-frame-parameter nil 'border-width 0)
-(set-fringe-style 0)
+(use-package spacious-padding)
+(spacious-padding-mode)
 
 
 ;; Darwin
@@ -205,15 +202,8 @@
 
 
 ;; Theme
-(use-package stimmung-themes)
-
-(setq modus-themes-common-palette-overrides
-      '((border-mode-line-active bg-mode-line-active)
-        (border-mode-line-inactive bg-mode-line-inactive)
-        (bg-mode-line-active bg-mode-line-inactive)
-	(bg-main bg-dim)))
-
-(load-theme 'modus-operandi)
+(use-package reverse-theme)
+(load-theme 'reverse) ;; modus-operandi at day, reverse at night
 
 
 ;; Custom functions
@@ -245,10 +235,8 @@
 (global-set-key (kbd "C-x j") 'b-edit-in-intellij)
 
 
-;; 
 ;; Mail
 ;; This code is borrowed from https://macowners.club/posts/email-emacs-mu4e-macos/
-;;
 (use-package
  mu4e
  :load-path "/opt/homebrew/Cellar/mu/1.10.8/share/emacs/site-lisp/mu/mu4e/")
@@ -340,4 +328,9 @@
 
 ;; Elfeed
 ;; Load feeds from NetNewsFeed .opml file
-(use-package 'elfeed)
+(use-package elfeed)
+
+
+;; vterm
+(setq vterm-timer-delay 0)
+
