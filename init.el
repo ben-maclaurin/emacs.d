@@ -208,6 +208,7 @@
 (setq modus-themes-common-palette-overrides
       '((border-mode-line-active bg-mode-line-active)
         (border-mode-line-inactive bg-mode-line-inactive)
+        (bg-mode-line-active bg-mode-line-inactive)
 	(bg-main bg-dim)))
 
 (load-theme 'modus-operandi)
