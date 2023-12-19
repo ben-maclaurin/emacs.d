@@ -73,7 +73,7 @@
 
 (setq-default line-spacing 5)
 
-(set-frame-font "Berkeley Mono Variable-14" nil t) ;; s-tier
+(set-frame-font "Berkeley Mono Variable-17" nil t) ;; s-tier
 
 (use-package spacious-padding)
 (spacious-padding-mode)
@@ -202,8 +202,7 @@
 
 
 ;; Theme
-(use-package reverse-theme)
-(load-theme 'reverse) ;; modus-operandi at day, reverse at night
+(load-theme 'modus-vivendi)
 
 
 ;; Custom functions
@@ -226,11 +225,7 @@
 (defun b-edit-in-intellij ()
   "Open the current file in Intellij"
   (interactive)
-  (when buffer-file-name
-    (shell-command
-     (concat
-      "open -a 'IntelliJ IDEA.app' "
-      (shell-quote-argument buffer-file-name)))))
+  (shell-command "open -a 'WebStorm.app' ."))
 
 (global-set-key (kbd "C-x j") 'b-edit-in-intellij)
 
@@ -241,6 +236,7 @@
  mu4e
  :load-path "/opt/homebrew/Cellar/mu/1.10.8/share/emacs/site-lisp/mu/mu4e/")
 
+(require 'mu4e)
 (require 'smtpmail)
 
 (setq mu4e-mu-binary (executable-find "mu"))
@@ -249,10 +245,14 @@
 (setq mu4e-update-interval 60)
 (setq mu4e-attachment-dir "~/Desktop")
 (setq mu4e-change-filenames-when-moving t)
-(setq mu4e-user-mail-address-list '("ben.maclaurin@icloud.com"))
+(setq mu4e-user-mail-address-list
+      '("ben.maclaurin@icloud.com" "contact@benmaclaurin.com"))
 
 (setq mu4e-maildir-shortcuts
-      '(("/icloud/INBOX" . ?i) ("/icloud/Sent Messages" . ?I)))
+      '(("/icloud/INBOX" . ?i)
+        ("/icloud/Sent Messages" . ?I)
+        ("/porkbun/INBOX" . ?p)
+        ("/porkbun/Sent Messages" . ?P)))
 
 (setq mu4e-bookmarks nil)
 
@@ -277,16 +277,38 @@
             (mu4e-drafts-folder . "/icloud/Drafts")
             (mu4e-refile-folder . "/icloud/Archive")
             (mu4e-sent-folder . "/icloud/Sent Messages")
-            (mu4e-trash-folder . "/icloud/Deleted Messages")))))
+            (mu4e-trash-folder . "/icloud/Deleted Messages")))
 
-(setq mu4e-context-policy 'pick-first)
+        ,(make-mu4e-context
+          :name "porkbun"
+          :enter-func
+          (lambda ()
+            (mu4e-message "Enter contact@benmaclaurin.com context"))
+          :leave-func
+          (lambda ()
+            (mu4e-message "Leave contact@benmaclaurin.com context"))
+          :match-func
+          (lambda (msg)
+            (when msg
+              (mu4e-message-contact-field-matches
+               msg
+               :to "contact@benmaclaurin.com")))
+          :vars
+          '((user-mail-address . "contact@benmaclaurin.com")
+            (user-full-name . "Ben MacLaurin")
+            (mu4e-drafts-folder . "/porkbun/Drafts")
+            (mu4e-refile-folder . "/porkbun/Archive")
+            (mu4e-sent-folder . "/porkbun/Sent Messages")
+            (mu4e-trash-folder . "/porkbun/Deleted Messages")))))
 
-(setq mu4e-compose-context-policy 'ask)
+(setq mu4e-context-policy 'always-ask)
+(setq mu4e-compose-context-policy 'always-ask)
 
 (require 'epa-file)
 (epa-file-enable)
 (setq epa-pinentry-mode 'loopback)
 (auth-source-forget-all-cached)
+
 (setq message-kill-buffer-on-exit t)
 
 (setq
@@ -306,13 +328,19 @@
                (account
                 (cond
                  ((string-match "ben.maclaurin@icloud.com" from)
-                  "icloud"))))
+                  "icloud")
+                 ((string-match "contact@benmaclaurin.com" from)
+                  "porkbun"))))
           (setq message-sendmail-extra-arguments
                 (list ' "-a" account))))))
+
+(add-hook 'message-send-mail-hook 'timu/set-msmtp-account)
 
 (add-hook
  'mu4e-compose-mode-hook
  (defun timu/add-cc-and-bcc ()
+   "My Function to automatically add Cc & Bcc: headers.
+    This is in the mu4e compose mode."
    (save-excursion (message-add-header "Cc:\n"))
    (save-excursion (message-add-header "Bcc:\n"))))
 
@@ -323,8 +351,12 @@
 ;; package repo: https://github.com/ben-maclaurin/ynab-emacs
 (require 'ynab)
 (setq ynab-budget-id "64dfafd8-500e-4383-8f81-1822475830ec")
-(global-set-key (kbd "C-x y") 'ynab-budget)
+(setq ynab-api-key
+      (string-trim
+       (shell-command-to-string
+        "security find-generic-password -s ynab-api-key -a ben -w")))
 
+(global-set-key (kbd "C-x y") 'ynab-budget)
 
 ;; Elfeed
 ;; Load feeds from NetNewsFeed .opml file
@@ -332,5 +364,31 @@
 
 
 ;; vterm
+(use-package vterm)
 (setq vterm-timer-delay 0)
+
+
+;; Racket support
+(use-package racket-mode)
+
+
+;; Htmlize
+(use-package htmlize)
+
+
+;; org-msg
+(use-package org-msg)
+(setq mail-user-agent 'mu4e-user-agent)
+
+
+(setq-default mode-line-format (append mode-line-format '(" I have never regretted going slowly")))
+
+(setq dired-dwim-target t)
+
+
+
+
+
+
+
 
