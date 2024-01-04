@@ -200,10 +200,9 @@
 (global-set-key (kbd "C-h k") #'helpful-key)
 (global-set-key (kbd "C-h x") #'helpful-command)
 
-
 ;; Theme
-(load-theme 'modus-vivendi)
-
+(load-theme 'modus-operandi)
+(require 'ef-themes)
 
 ;; Custom functions
 (defun b-quick-save-file ()
