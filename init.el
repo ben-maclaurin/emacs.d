@@ -22,6 +22,7 @@
 ;; GNU General Public License for more details.
 ;;
 ;; For a full copy of the GNU General Public License
+;; this is a test
 ;; see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
