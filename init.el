@@ -59,9 +59,6 @@
 (setq initial-major-mode 'org-mode) ; mainly for scratch buffer
 (setq initial-scratch-message nil)
 (setq inhibit-startup-message t)
-(setq
- initial-scratch-message
- "If today were the last day of my life, would I want to do what I am about to do today?")
 
 
 ;; UI
@@ -73,10 +70,7 @@
 
 (setq-default line-spacing 5)
 
-(set-frame-font "Berkeley Mono Variable-17" nil t) ;; s-tier
-
-(use-package spacious-padding)
-(spacious-padding-mode)
+(set-frame-font "Essential PragmataPro-14" nil t)
 
 
 ;; Darwin
@@ -112,7 +106,6 @@
 ;; Org
 (add-hook 'org-mode-hook 'org-indent-mode)
 (setq org-hide-emphasis-markers t)
-
 
 ;; No backups, no auto-save
 (setq make-backup-files nil)
@@ -201,15 +194,8 @@
 (global-set-key (kbd "C-h x") #'helpful-command)
 
 ;; Theme
-(load-theme 'modus-operandi)
+(load-theme 'fleetish)
 (require 'ef-themes)
-
-;; Custom functions
-(defun b-quick-save-file ()
-  "Quickly save a file"
-  (interactive)
-  (write-file
-   (concat "~/desktop/" (concat (current-time-string) ".org"))))
 
 (defun b-random-file ()
   "Open a random file from the current directory"
@@ -220,130 +206,6 @@
       (setq random-file (nth (random (length files)) files)))
     (find-file random-file)
     (edit-in)))
-
-(defun b-edit-in-intellij ()
-  "Open the current file in Intellij"
-  (interactive)
-  (shell-command "open -a 'WebStorm.app' ."))
-
-(global-set-key (kbd "C-x j") 'b-edit-in-intellij)
-
-
-;; Mail
-;; This code is borrowed from https://macowners.club/posts/email-emacs-mu4e-macos/
-(use-package
- mu4e
- :load-path "/opt/homebrew/Cellar/mu/1.10.8/share/emacs/site-lisp/mu/mu4e/")
-
-(require 'mu4e)
-(require 'smtpmail)
-
-(setq mu4e-mu-binary (executable-find "mu"))
-(setq mu4e-maildir "~/.maildir")
-(setq mu4e-get-mail-command (concat (executable-find "mbsync") " -a"))
-(setq mu4e-update-interval 60)
-(setq mu4e-attachment-dir "~/Desktop")
-(setq mu4e-change-filenames-when-moving t)
-(setq mu4e-user-mail-address-list
-      '("ben.maclaurin@icloud.com" "contact@benmaclaurin.com"))
-
-(setq mu4e-maildir-shortcuts
-      '(("/icloud/INBOX" . ?i)
-        ("/icloud/Sent Messages" . ?I)
-        ("/porkbun/INBOX" . ?p)
-        ("/porkbun/Sent Messages" . ?P)))
-
-(setq mu4e-bookmarks nil)
-
-(setq mu4e-contexts
-      `(,(make-mu4e-context
-          :name "icloud"
-          :enter-func
-          (lambda ()
-            (mu4e-message "Enter ben.maclaurin@icloud.com context"))
-          :leave-func
-          (lambda ()
-            (mu4e-message "Leave ben.maclaurin@icloud.com context"))
-          :match-func
-          (lambda (msg)
-            (when msg
-              (mu4e-message-contact-field-matches
-               msg
-               :to "ben.maclaurin@icloud.com")))
-          :vars
-          '((user-mail-address . "ben.maclaurin@icloud.com")
-            (user-full-name . "Ben MacLaurin")
-            (mu4e-drafts-folder . "/icloud/Drafts")
-            (mu4e-refile-folder . "/icloud/Archive")
-            (mu4e-sent-folder . "/icloud/Sent Messages")
-            (mu4e-trash-folder . "/icloud/Deleted Messages")))
-
-        ,(make-mu4e-context
-          :name "porkbun"
-          :enter-func
-          (lambda ()
-            (mu4e-message "Enter contact@benmaclaurin.com context"))
-          :leave-func
-          (lambda ()
-            (mu4e-message "Leave contact@benmaclaurin.com context"))
-          :match-func
-          (lambda (msg)
-            (when msg
-              (mu4e-message-contact-field-matches
-               msg
-               :to "contact@benmaclaurin.com")))
-          :vars
-          '((user-mail-address . "contact@benmaclaurin.com")
-            (user-full-name . "Ben MacLaurin")
-            (mu4e-drafts-folder . "/porkbun/Drafts")
-            (mu4e-refile-folder . "/porkbun/Archive")
-            (mu4e-sent-folder . "/porkbun/Sent Messages")
-            (mu4e-trash-folder . "/porkbun/Deleted Messages")))))
-
-(setq mu4e-context-policy 'always-ask)
-(setq mu4e-compose-context-policy 'always-ask)
-
-(require 'epa-file)
-(epa-file-enable)
-(setq epa-pinentry-mode 'loopback)
-(auth-source-forget-all-cached)
-
-(setq message-kill-buffer-on-exit t)
-
-(setq
- send-mail-function 'sendmail-send-it
- message-send-mail-function 'sendmail-send-it)
-
-(setq sendmail-program (executable-find "msmtp"))
-(setq message-sendmail-envelope-from 'header)
-
-(defun timu/set-msmtp-account ()
-  (if (message-mail-p)
-      (save-excursion
-        (let* ((from
-                (save-restriction
-                  (message-narrow-to-headers)
-                  (message-fetch-field "from")))
-               (account
-                (cond
-                 ((string-match "ben.maclaurin@icloud.com" from)
-                  "icloud")
-                 ((string-match "contact@benmaclaurin.com" from)
-                  "porkbun"))))
-          (setq message-sendmail-extra-arguments
-                (list ' "-a" account))))))
-
-(add-hook 'message-send-mail-hook 'timu/set-msmtp-account)
-
-(add-hook
- 'mu4e-compose-mode-hook
- (defun timu/add-cc-and-bcc ()
-   "My Function to automatically add Cc & Bcc: headers.
-    This is in the mu4e compose mode."
-   (save-excursion (message-add-header "Cc:\n"))
-   (save-excursion (message-add-header "Bcc:\n"))))
-
-(add-hook 'mu4e-compose-mode-hook 'company-mode)
 
 
 ;; YNAB
@@ -357,37 +219,35 @@
 
 (global-set-key (kbd "C-x y") 'ynab-budget)
 
-;; Elfeed
-;; Load feeds from NetNewsFeed .opml file
-(use-package elfeed)
-
-
 ;; vterm
 (use-package vterm)
 (setq vterm-timer-delay 0)
 
-
-;; Racket support
-(use-package racket-mode)
-
-
-;; Htmlize
-(use-package htmlize)
-
-
-;; org-msg
-(use-package org-msg)
-(setq mail-user-agent 'mu4e-user-agent)
-
-
-(setq-default mode-line-format (append mode-line-format '(" I have never regretted going slowly")))
-
 (setq dired-dwim-target t)
 
+(require 'yasnippet)
+(yas-global-mode 1)
 
+(require 'lsp-bridge)
+(global-lsp-bridge-mode)
 
+(setq treesit-language-source-alist
+   '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+     (cmake "https://github.com/uyha/tree-sitter-cmake")
+     (css "https://github.com/tree-sitter/tree-sitter-css")
+     (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+     (go "https://github.com/tree-sitter/tree-sitter-go")
+     (html "https://github.com/tree-sitter/tree-sitter-html")
+     (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+     (json "https://github.com/tree-sitter/tree-sitter-json")
+     (make "https://github.com/alemuller/tree-sitter-make")
+     (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+     (python "https://github.com/tree-sitter/tree-sitter-python")
+     (toml "https://github.com/tree-sitter/tree-sitter-toml")
+     (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "v0.20.3" "tsx/src")
+     (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "v0.20.3" "typescript/src")
+     (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-
-
+(use-package forge)
 
 
