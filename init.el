@@ -70,7 +70,7 @@
 
 (setq-default line-spacing 5)
 
-(set-frame-font "Essential PragmataPro-14" nil t)
+(set-frame-font "Berkeley Mono Variable-14" nil t)
 
 
 ;; Darwin
@@ -83,20 +83,6 @@
 
 ;; Convenience
 (setq next-line-add-newlines t)
-
-(global-set-key
- (kbd "M-n")
- (lambda ()
-   (interactive)
-   (next-line)))
-
-(global-set-key
- (kbd "M-p")
- (lambda ()
-   (interactive)
-   (previous-line)))
-
-(global-set-key (kbd "M-g") 'keyboard-quit)
 
 (global-set-key (kbd "M-c") 'kill-ring-save)
 
@@ -119,8 +105,7 @@
  :init (require 'expand-region)
  :bind
  (("C-l" . er/expand-region)
-  ("C-;" . er/contract-region)
-  ("M-l" . er/expand-region)))
+  ("C-;" . er/contract-region))
 
 (use-package prettier)
 
@@ -146,7 +131,7 @@
 
 (use-package
  consult
- :bind (("C-x b" . consult-buffer) ("M-s" . consult-fd))
+ :bind (("C-x b" . consult-buffer) ("M-p" . consult-fd) ("M-s" . consult-ripgrep) ("C-s"))
  :hook (completion-list-mode . consult-preview-at-point-mode)
  :init
  (setq
@@ -194,7 +179,7 @@
 (global-set-key (kbd "C-h x") #'helpful-command)
 
 ;; Theme
-(load-theme 'fleetish)
+(load-theme 'modus-vivendi)
 (require 'ef-themes)
 
 (defun b-random-file ()
@@ -225,11 +210,17 @@
 
 (setq dired-dwim-target t)
 
+(use-package yasnippet)
 (require 'yasnippet)
 (yas-global-mode 1)
 
 (require 'lsp-bridge)
 (global-lsp-bridge-mode)
+
+(use-package markdown-mode
+  :hook (markdown-mode . lsp)
+  :config
+  (require 'lsp-marksman))
 
 (setq treesit-language-source-alist
    '((bash "https://github.com/tree-sitter/tree-sitter-bash")
@@ -249,5 +240,65 @@
      (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
 (use-package forge)
+
+;; LSP-Bridge
+(global-set-key (kbd "M-.") 'lsp-bridge-find-def)
+(global-set-key (kbd "M-,") 'lsp-bridge-find-def-return)
+(global-set-key (kbd "M-;") 'lsp-bridge-find-references)
+(global-set-key (kbd "C-i") 'lsp-bridge-popup-documentation)
+(global-set-key (kbd "C-.") 'lsp-bridge-code-action)
+
+(global-set-key (kbd "M-/") 'comment-dwim)
+
+
+(global-display-line-numbers-mode t)
+
+
+(defun b-select-current-line-or-expand-down ()
+  "Select the current line or, if already selecting, extend the selection down a line."
+  (interactive)
+  (if (use-region-p)
+      (progn
+        (goto-char (region-end))
+        (forward-line 1)
+        (end-of-line))
+    (progn
+      (beginning-of-line) ; Move to the beginning of the current line
+      (set-mark (point)) ; Set the mark at the current position
+      (end-of-line)))) ; Move to the end of the current line and extend the selection
+
+(global-set-key (kbd "M-l") 'b-select-current-line-or-expand-down)
+
+(defvar my-lsp-bridge-doc-timer nil
+  "Timer to trigger showing lsp-bridge documentation after a hover delay.")
+
+(defun my-cancel-lsp-bridge-doc-timer ()
+  "Cancel the lsp-bridge doc timer if it's active."
+  (when my-lsp-bridge-doc-timer
+    (cancel-timer my-lsp-bridge-doc-timer)
+    (setq my-lsp-bridge-doc-timer nil)))
+
+(defun my-lsp-bridge-hover-doc ()
+  "Show lsp-bridge documentation if lsp-bridge-mode is enabled and point is idle."
+  (my-cancel-lsp-bridge-doc-timer) ; Ensure any previous timer is cancelled
+  (setq my-lsp-bridge-doc-timer
+        (run-with-idle-timer
+         1 nil ; Wait for 1 second of idle time
+         (lambda ()
+           (when (and (bound-and-true-p lsp-bridge-mode) ; Check if lsp-bridge-mode is active
+                      (not (window-minibuffer-p))) ; Ensure we're not in the minibuffer
+             (lsp-bridge-popup-documentation))))))
+
+(defun my-setup-lsp-bridge-doc-on-hover ()
+  "Setup hover documentation for lsp-bridge."
+  (add-hook 'post-command-hook #'my-lsp-bridge-hover-doc))
+
+(defun my-teardown-lsp-bridge-doc-on-hover ()
+  "Tear down hover documentation setup for lsp-bridge."
+  (remove-hook 'post-command-hook #'my-lsp-bridge-hover-doc)
+  (my-cancel-lsp-bridge-doc-timer))
+
+(add-hook 'lsp-bridge-mode-hook #'my-setup-lsp-bridge-doc-on-hover)
+
 
 
