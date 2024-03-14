@@ -105,7 +105,7 @@
  :init (require 'expand-region)
  :bind
  (("C-l" . er/expand-region)
-  ("C-;" . er/contract-region))
+  ("C-;" . er/contract-region)))
 
 (use-package prettier)
 
@@ -131,7 +131,7 @@
 
 (use-package
  consult
- :bind (("C-x b" . consult-buffer) ("M-p" . consult-fd) ("M-s" . consult-ripgrep) ("C-s"))
+ :bind (("C-x b" . consult-buffer) ("M-p" . consult-fd) ("M-s" . consult-ripgrep) ("C-s" . consult-line))
  :hook (completion-list-mode . consult-preview-at-point-mode)
  :init
  (setq
@@ -239,8 +239,6 @@
      (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "v0.20.3" "typescript/src")
      (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-(use-package forge)
-
 ;; LSP-Bridge
 (global-set-key (kbd "M-.") 'lsp-bridge-find-def)
 (global-set-key (kbd "M-,") 'lsp-bridge-find-def-return)
@@ -253,52 +251,15 @@
 
 (global-display-line-numbers-mode t)
 
+(add-hook 'vterm-mode-hook
+          (lambda ()
+            (display-line-numbers-mode 0)))
 
-(defun b-select-current-line-or-expand-down ()
-  "Select the current line or, if already selecting, extend the selection down a line."
-  (interactive)
-  (if (use-region-p)
-      (progn
-        (goto-char (region-end))
-        (forward-line 1)
-        (end-of-line))
-    (progn
-      (beginning-of-line) ; Move to the beginning of the current line
-      (set-mark (point)) ; Set the mark at the current position
-      (end-of-line)))) ; Move to the end of the current line and extend the selection
+(add-hook 'eshell-mode-hook
+          (lambda ()
+            (display-line-numbers-mode 0)))
 
-(global-set-key (kbd "M-l") 'b-select-current-line-or-expand-down)
+;; Smooth scrolling
+(pixel-scroll-precision-mode 1)
 
-(defvar my-lsp-bridge-doc-timer nil
-  "Timer to trigger showing lsp-bridge documentation after a hover delay.")
-
-(defun my-cancel-lsp-bridge-doc-timer ()
-  "Cancel the lsp-bridge doc timer if it's active."
-  (when my-lsp-bridge-doc-timer
-    (cancel-timer my-lsp-bridge-doc-timer)
-    (setq my-lsp-bridge-doc-timer nil)))
-
-(defun my-lsp-bridge-hover-doc ()
-  "Show lsp-bridge documentation if lsp-bridge-mode is enabled and point is idle."
-  (my-cancel-lsp-bridge-doc-timer) ; Ensure any previous timer is cancelled
-  (setq my-lsp-bridge-doc-timer
-        (run-with-idle-timer
-         1 nil ; Wait for 1 second of idle time
-         (lambda ()
-           (when (and (bound-and-true-p lsp-bridge-mode) ; Check if lsp-bridge-mode is active
-                      (not (window-minibuffer-p))) ; Ensure we're not in the minibuffer
-             (lsp-bridge-popup-documentation))))))
-
-(defun my-setup-lsp-bridge-doc-on-hover ()
-  "Setup hover documentation for lsp-bridge."
-  (add-hook 'post-command-hook #'my-lsp-bridge-hover-doc))
-
-(defun my-teardown-lsp-bridge-doc-on-hover ()
-  "Tear down hover documentation setup for lsp-bridge."
-  (remove-hook 'post-command-hook #'my-lsp-bridge-hover-doc)
-  (my-cancel-lsp-bridge-doc-timer))
-
-(add-hook 'lsp-bridge-mode-hook #'my-setup-lsp-bridge-doc-on-hover)
-
-
-
+(rainbow-delimiters-mode 1)
