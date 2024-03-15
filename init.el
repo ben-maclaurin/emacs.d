@@ -179,7 +179,7 @@
 (global-set-key (kbd "C-h x") #'helpful-command)
 
 ;; Theme
-(load-theme 'modus-vivendi)
+;; (load-theme 'modus-vivendi)
 (require 'ef-themes)
 
 (defun b-random-file ()
@@ -244,7 +244,7 @@
 (global-set-key (kbd "M-,") 'lsp-bridge-find-def-return)
 (global-set-key (kbd "M-;") 'lsp-bridge-find-references)
 (global-set-key (kbd "C-i") 'lsp-bridge-popup-documentation)
-(global-set-key (kbd "C-.") 'lsp-bridge-code-action)
+;; (global-set-key (kbd "C-.") 'lsp-bridge-code-action)
 
 (global-set-key (kbd "M-/") 'comment-dwim)
 
@@ -259,7 +259,90 @@
           (lambda ()
             (display-line-numbers-mode 0)))
 
+;; Actually make the below run globally
+
 ;; Smooth scrolling
 (pixel-scroll-precision-mode 1)
 
 (rainbow-delimiters-mode 1)
+
+(blink-cursor-mode)
+
+(use-package avy)
+
+;; https://karthinks.com/software/avy-can-do-anything/
+(global-set-key (kbd "C-j") 'avy-goto-char-timer)
+
+;; Avy customisations
+(defun avy-action-kill-whole-line (pt)
+  (save-excursion
+    (goto-char pt)
+    (kill-whole-line))
+  (select-window
+   (cdr
+    (ring-ref avy-ring 0)))
+  t)
+
+(setf (alist-get ?k avy-dispatch-alist) 'avy-action-kill-stay
+      (alist-get ?K avy-dispatch-alist) 'avy-action-kill-whole-line)
+
+(defun avy-action-copy-whole-line (pt)
+  (save-excursion
+    (goto-char pt)
+    (cl-destructuring-bind (start . end)
+        (bounds-of-thing-at-point 'line)
+      (copy-region-as-kill start end)))
+  (select-window
+   (cdr
+    (ring-ref avy-ring 0)))
+  t)
+
+(defun avy-action-yank-whole-line (pt)
+  (avy-action-copy-whole-line pt)
+  (save-excursion (yank))
+  t)
+
+(setf (alist-get ?y avy-dispatch-alist) 'avy-action-yank
+      (alist-get ?w avy-dispatch-alist) 'avy-action-copy
+      (alist-get ?W avy-dispatch-alist) 'avy-action-copy-whole-line
+      (alist-get ?Y avy-dispatch-alist) 'avy-action-yank-whole-line)
+
+(defun avy-action-mark-to-char (pt)
+  (activate-mark)
+  (goto-char pt))
+
+(setf (alist-get ?  avy-dispatch-alist) 'avy-action-mark-to-char)
+
+(defun avy-action-embark (pt)
+  (unwind-protect
+      (save-excursion
+        (goto-char pt)
+        (embark-act))
+    (select-window
+     (cdr (ring-ref avy-ring 0))))
+  t)
+
+(setf (alist-get ?. avy-dispatch-alist) 'avy-action-embark)
+
+(use-package embark)
+(global-set-key (kbd "C-.") 'embark-act)
+
+;; Consult users will also want the embark-consult package.
+(use-package embark-consult
+  :ensure t ; only need to install it, embark loads it after consult if found
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
+(use-package ace-window)
+
+(define-key embark-general-map "lsf" #'lsp-bridge-find-def)
+(define-key embark-general-map "lsr" #'lsp-bridge-find-references)
+(define-key embark-general-map "lsd" #'lsp-bridge-popup-documentation)
+
+;; (global-set-key (kbd "M-.") 'lsp-bridge-find-def)
+;; (global-set-key (kbd "M-,") 'lsp-bridge-find-def-return)
+;; (global-set-key (kbd "M-;") 'lsp-bridge-find-references)
+;; (global-set-key (kbd "C-i") 'lsp-bridge-popup-documentation)
+
+;; (global-set-key (kbd "C-.") 'lsp-bridge-code-action)
+
