@@ -195,14 +195,14 @@
 
 ;; YNAB
 ;; package repo: https://github.com/ben-maclaurin/ynab-emacs
-(require 'ynab)
-(setq ynab-budget-id "64dfafd8-500e-4383-8f81-1822475830ec")
-(setq ynab-api-key
-      (string-trim
-       (shell-command-to-string
-        "security find-generic-password -s ynab-api-key -a ben -w")))
+;; (require 'ynab)
+;; (setq ynab-budget-id "64dfafd8-500e-4383-8f81-1822475830ec")
+;; (setq ynab-api-key
+;;       (string-trim
+;;        (shell-command-to-string
+;;         "security find-generic-password -s ynab-api-key -a ben -w")))
 
-(global-set-key (kbd "C-x y") 'ynab-budget)
+;; (global-set-key (kbd "C-x y") 'ynab-budget)
 
 ;; vterm
 (use-package vterm)
@@ -244,7 +244,8 @@
 (global-set-key (kbd "M-,") 'lsp-bridge-find-def-return)
 (global-set-key (kbd "M-;") 'lsp-bridge-find-references)
 (global-set-key (kbd "C-i") 'lsp-bridge-popup-documentation)
-;; (global-set-key (kbd "C-.") 'lsp-bridge-code-action)
+(global-set-key (kbd "C-.") 'lsp-bridge-code-action)
+(global-set-key (kbd "C-'") 'lsp-bridge-diagnostic-jump-next)
 
 (global-set-key (kbd "M-/") 'comment-dwim)
 
@@ -313,16 +314,38 @@
 
 (setf (alist-get ?  avy-dispatch-alist) 'avy-action-mark-to-char)
 
-(defun avy-action-embark (pt)
+;; (defun avy-action-embark (pt)
+;;   (unwind-protect
+;;       (save-excursion
+;;         (goto-char pt)
+;;         (embark-act))
+;;     (selec-window
+;;      (cdr (ring-ref avy-ring 0))))
+;;   t)
+
+;; ;; (setf (alist-get ?. avy-dispatch-alist) 'avy-action-embark)
+
+(defun avy-action-lsp-bridge-find-def (pt)
   (unwind-protect
       (save-excursion
         (goto-char pt)
-        (embark-act))
+        (lsp-bridge-find-def))
     (select-window
      (cdr (ring-ref avy-ring 0))))
   t)
 
-(setf (alist-get ?. avy-dispatch-alist) 'avy-action-embark)
+(setf (alist-get ?. avy-dispatch-alist) 'avy-action-lsp-bridge-find-def)
+
+(defun avy-action-lsp-bridge-popup-documentation (pt)
+  (unwind-protect
+      (save-excursion
+        (goto-char pt)
+        (lsp-bridge-popup-documentation))
+    (select-window
+     (cdr (ring-ref avy-ring 0))))
+  t)
+
+(setf (alist-get ?i avy-dispatch-alist) 'avy-action-lsp-bridge-popup-documentation)
 
 (use-package embark)
 (global-set-key (kbd "C-.") 'embark-act)
@@ -339,6 +362,8 @@
 (define-key embark-general-map "lsr" #'lsp-bridge-find-references)
 (define-key embark-general-map "lsd" #'lsp-bridge-popup-documentation)
 
+(setq avy-timeout-seconds 0.3)
+
 ;; (global-set-key (kbd "M-.") 'lsp-bridge-find-def)
 ;; (global-set-key (kbd "M-,") 'lsp-bridge-find-def-return)
 ;; (global-set-key (kbd "M-;") 'lsp-bridge-find-references)
@@ -346,3 +371,9 @@
 
 ;; (global-set-key (kbd "C-.") 'lsp-bridge-code-action)
 
+(global-set-key (kbd "C-x o") 'ace-window)
+(setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+
+(use-package docker
+  :ensure t
+  :bind ("C-c d" . docker))
